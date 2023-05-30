@@ -6,7 +6,7 @@ local config = require("maven.config")
 local view
 
 local function has_build_file(cwd)
-  return vim.fn.findfile("pom.xml", cwd) ~= nil
+  return vim.fn.findfile("pom.xml", cwd) ~= ""
 end
 
 local function get_cwd()
@@ -27,17 +27,17 @@ function maven.commands()
     end,
   }, function(cmd)
     if cmd ~= nil then
-      maven.execute_command(cmd, get_cwd())
+      local cwd = get_cwd()
+      if not has_build_file(cwd) then
+        vim.notify("no pom.xml file found under " .. cwd, vim.log.levels.ERROR)
+        return
+      end
+      maven.execute_command(cmd, cwd)
     end
   end)
 end
 
 function maven.execute_command(command, cwd)
-  if not has_build_file(cwd) then
-    vim.notify("no pom.xml file found under " .. cwd)
-    return
-  end
-
   local args = { command.cmd }
 
   if config.options.settings ~= nil and config.options.settings ~= "" then
