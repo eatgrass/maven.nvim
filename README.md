@@ -1,0 +1,50 @@
+# Maven.nvim
+
+This is a Neovim plugin to interactively execute Maven commands within the editor.
+
+![Maven](./screen/screenshot.png)
+
+## Features
+
+[x] Run Maven goals (e.g. clean, compile, test, ...) within Neovim
+[] Display logs of Maven commands execution
+[] Customize Maven goals
+
+## Installation
+
+### Lazy
+
+Install the plugin with your preferred package manager:
+
+```lua
+{
+  "eatgrass/maven.nvim",
+  cmd = "Maven",
+  dependencies = "nvim-lua/plenary.nvim",
+  config = function()
+    require('maven').setup({
+      executable="./mvnw"
+    })
+  end
+},
+```
+
+### Configuration
+
+```lua
+require('maven').setup({
+  executable = "./mvnw", -- `mvn` should be in your `PATH`, or the absolute path or the maven exectable, or `./mvnw`
+  cwd = nil, -- work directory, default to `vim.fn.getcwd()`
+  settings = nil, -- specify the settings file or use the default settings
+})
+```
+
+### Usage
+
+#### Commands
+
+`:Maven` choose to maven command to execute
+
+#### Keys
+
+`q` or `<ESC>` to close the maven log buffer
