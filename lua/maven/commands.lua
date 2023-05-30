@@ -1,4 +1,7 @@
 local commands = {
+  ---@class MavenCommandOption
+  ---@field cmd string[]
+  ---@field desc string|nil
   { cmd = { "clean" } },
   { cmd = { "validate" } },
   { cmd = { "compile" } },

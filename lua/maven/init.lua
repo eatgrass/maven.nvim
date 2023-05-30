@@ -16,6 +16,11 @@ end
 
 function maven.setup(options)
   config.setup(options)
+  if config.options.commands ~= nil then
+    for _, command in pairs(config.options.commands) do
+      table.insert(commands, command)
+    end
+  end
 end
 
 function maven.commands()
@@ -42,7 +47,7 @@ function maven.execute_command(command, cwd)
 
   if config.options.settings ~= nil and config.options.settings ~= "" then
     table.insert(args, "-s")
-    table.insert(config.options.settings)
+    table.insert(args, config.options.settings)
   end
 
   for _, arg in pairs(command.cmd) do
