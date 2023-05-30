@@ -31,18 +31,37 @@ function maven.commands()
       return item.desc or item.cmd[1]
     end,
   }, function(cmd)
-    if cmd ~= nil then
-      local cwd = get_cwd()
-      if not has_build_file(cwd) then
-        vim.notify("no pom.xml file found under " .. cwd, vim.log.levels.ERROR)
-        return
-      end
-      maven.execute_command(cmd, cwd)
-    end
+    maven.execute_command(cmd)
   end)
 end
 
-function maven.execute_command(command, cwd)
+---@return MavenCommandOption|nil
+function maven.to_command(str)
+  if str == nil or str == "" then
+    return
+  end
+  local cmd = {}
+  for command in str:gmatch("%S+") do
+    table.insert(cmd, command)
+  end
+  print(vim.inspect(cmd))
+  return { cmd = cmd }
+end
+
+function maven.execute_command(command)
+
+  if command == nil then
+    vim.notify("No maven command")
+    return
+  end
+
+  local cwd = get_cwd()
+
+  if not has_build_file(cwd) then
+    vim.notify("no pom.xml file found under " .. cwd, vim.log.levels.ERROR)
+    return
+  end
+
   local args = {}
 
   if config.options.settings ~= nil and config.options.settings ~= "" then

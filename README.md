@@ -46,7 +46,9 @@ require('maven').setup({
 
 #### Commands
 
-`:Maven` choose to maven command to execute
+`:Maven` choose maven command to execute
+
+`:MavenExec` input maven command and run
 
 #### Keys
 
