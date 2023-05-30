@@ -44,7 +44,6 @@ function maven.to_command(str)
   for command in str:gmatch("%S+") do
     table.insert(cmd, command)
   end
-  print(vim.inspect(cmd))
   return { cmd = cmd }
 end
 
