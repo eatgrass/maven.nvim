@@ -23,7 +23,7 @@ function maven.commands()
   vim.ui.select(commands, {
     prompt = prompt,
     format_item = function(item)
-      return item.desc or item.cmd
+      return item.desc or item.cmd[1]
     end,
   }, function(cmd)
     if cmd ~= nil then
@@ -38,16 +38,15 @@ function maven.commands()
 end
 
 function maven.execute_command(command, cwd)
-  local args = { command.cmd }
+  local args = {}
 
   if config.options.settings ~= nil and config.options.settings ~= "" then
-    table.insert(args, "-s " .. config.options.settings)
+    table.insert(args, "-s")
+    table.insert(config.options.settings)
   end
 
-  if command.args ~= nil then
-    for _, arg in command.args do
-      table.insert(args, arg)
-    end
+  for _, arg in pairs(command.cmd) do
+    table.insert(args, arg)
   end
 
   view = View.create()
