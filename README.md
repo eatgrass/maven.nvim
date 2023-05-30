@@ -6,9 +6,9 @@ This is a Neovim plugin to interactively execute Maven commands within the edito
 
 ## Features
 
-[x] Run Maven goals (e.g. clean, compile, test, ...) within Neovim
-[] Display logs of Maven commands execution
-[] Customize Maven goals
+- [x] Run Maven goals (e.g. clean, compile, test, ...) within Neovim
+- [x] Display logs of Maven commands execution
+- [ ] Customize Maven goals
 
 ## Installation
 
