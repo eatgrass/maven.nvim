@@ -19,7 +19,7 @@ Install the plugin with your preferred package manager:
 ```lua
 {
   "eatgrass/maven.nvim",
-  cmd = "Maven",
+  cmd = { "Maven", "MavenExec" },
   dependencies = "nvim-lua/plenary.nvim",
   config = function()
     require('maven').setup({

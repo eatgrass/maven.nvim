@@ -7,7 +7,7 @@ View.__index = View
 
 local function find_rogue_buffer()
   for _, v in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.fn.bufname(v) == "Maven" then
+    if vim.fn.bufname(v) == "maven" then
       return v
     end
   end
@@ -42,12 +42,12 @@ function View:setup()
   vim.cmd("setlocal nonu")
   vim.cmd("setlocal nornu")
 
-  if not pcall(vim.api.nvim_buf_set_name, self.buf, "Maven") then
+  if not pcall(vim.api.nvim_buf_set_name, self.buf, "maven") then
     View:clear_buf()
-    vim.api.nvim_buf_set_name(self.buf, "Maven")
+    vim.api.nvim_buf_set_name(self.buf, "maven")
   end
 
-  self:set_option("filetype", "Maven")
+  self:set_option("filetype", "maven")
   self:set_option("bufhidden", "wipe")
   self:set_option("buftype", "nofile")
   self:set_option("swapfile", false)
