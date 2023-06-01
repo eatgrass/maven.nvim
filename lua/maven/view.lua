@@ -66,6 +66,15 @@ function View:setup()
 
   vim.api.nvim_buf_set_keymap(self.buf, "n", "q", "<cmd>close<cr>", { silent = true, noremap = true, nowait = true })
   vim.api.nvim_buf_set_keymap(self.buf, "n", "<esc>", "<cmd>close<cr>", { silent = true, noremap = true, nowait = true })
+
+  vim.api.nvim_buf_attach(self.buf, false, {
+    on_lines = function()
+      vim.cmd("normal! G")
+      -- if vim.fn.mode() == "n" then
+      --   vim.cmd("normal! G")
+      -- end
+    end,
+  })
 end
 
 function View:clear_buf()
@@ -86,8 +95,9 @@ end
 
 function View:render_line(line)
   vim.schedule(function()
-    vim.fn.appendbufline(self.buf, vim.fn.line("$"), line)
-    vim.api.nvim_command("cbottom")
+    local last_line = vim.fn.getbufinfo(self.buf)[1].linecount
+    vim.fn.appendbufline(self.buf, last_line, line)
+    pcall(vim.api.nvim_win_set_cursor, self.win, { last_line + 1, 0 })
   end)
 end
 
