@@ -1,6 +1,9 @@
+local uv = vim.loop
+
 ---@class LogView
 ---@field buf number
 ---@field win number
+---@field job table
 local View = {}
 
 View.__index = View
@@ -65,14 +68,28 @@ function View:setup()
   self:set_option("fcs", "eob: ", true)
 
   vim.api.nvim_buf_set_keymap(self.buf, "n", "q", "<cmd>close<cr>", { silent = true, noremap = true, nowait = true })
-  vim.api.nvim_buf_set_keymap(self.buf, "n", "<esc>", "<cmd>close<cr>", { silent = true, noremap = true, nowait = true })
+  vim.api.nvim_buf_set_keymap(
+    self.buf,
+    "n",
+    "<esc>",
+    "<cmd>close<cr>",
+    { silent = true, noremap = true, nowait = true }
+  )
 
   vim.api.nvim_buf_attach(self.buf, false, {
     on_lines = function()
-      vim.cmd("normal! G")
-      -- if vim.fn.mode() == "n" then
-      --   vim.cmd("normal! G")
-      -- end
+      if vim.fn.mode() == "n" then
+        vim.cmd("normal! G")
+      end
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ "BufLeave" }, {
+    pattern = "maven",
+    callback = function()
+      if self.job and self.job.pid then
+        uv.kill(self.job.pid, 15)
+      end
     end,
   })
 end
@@ -95,9 +112,12 @@ end
 
 function View:render_line(line)
   vim.schedule(function()
-    local last_line = vim.fn.getbufinfo(self.buf)[1].linecount
-    vim.fn.appendbufline(self.buf, last_line, line)
-    pcall(vim.api.nvim_win_set_cursor, self.win, { last_line + 1, 0 })
+    local buf_info = vim.fn.getbufinfo(self.buf)
+    if buf_info[1] ~= nil then
+      local last_line = buf_info[1].linecount
+      vim.fn.appendbufline(self.buf, last_line, line)
+      pcall(vim.api.nvim_win_set_cursor, self.win, { last_line + 1, 0 })
+    end
   end)
 end
 

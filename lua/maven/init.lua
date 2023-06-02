@@ -2,8 +2,10 @@ local maven = {}
 local View = require("maven.view")
 local commands = require("maven.commands")
 local config = require("maven.config")
+local uv = vim.loop
 
 local view
+local job
 
 local function has_build_file(cwd)
   return vim.fn.findfile("pom.xml", cwd) ~= ""
@@ -48,7 +50,6 @@ function maven.to_command(str)
 end
 
 function maven.execute_command(command)
-
   if command == nil then
     vim.notify("No maven command")
     return
@@ -60,6 +61,8 @@ function maven.execute_command(command)
     vim.notify("no pom.xml file found under " .. cwd, vim.log.levels.ERROR)
     return
   end
+
+  maven.kill_running_job()
 
   local args = {}
 
@@ -74,21 +77,30 @@ function maven.execute_command(command)
 
   view = View.create()
 
-  require("plenary.job")
-    :new({
-      command = config.options.executable,
-      args = args,
-      cwd = cwd,
-      on_stdout = function(_, data)
+  job = require("plenary.job"):new({
+    command = config.options.executable,
+    args = args,
+    cwd = cwd,
+    on_stdout = function(_, data)
+      view:render_line(data)
+    end,
+    on_stderr = function(_, data)
+      vim.schedule(function()
         view:render_line(data)
-      end,
-      on_stderr = function(_, data)
-        vim.schedule(function()
-          view:render_line(data)
-        end)
-      end,
-    })
-    :start()
+      end)
+    end,
+  })
+
+  view.job = job
+
+  job:start()
+end
+
+function maven.kill_running_job()
+  if job and job.pid then
+    uv.kill(job.pid, 15)
+    job = nil
+  end
 end
 
 return maven
