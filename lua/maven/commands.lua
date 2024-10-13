@@ -1,3 +1,5 @@
+local actions = require("maven.actions")
+
 local commands = {
   ---@class MavenCommandOption
   ---@field cmd string[]
@@ -11,6 +13,8 @@ local commands = {
   { cmd = { "install" } },
   { cmd = { "site" } },
   { cmd = { "deploy" } },
+  { cmd = { "add-dependency" }, desc = "Open Maven Central and add dependency" },
+  { cmd = actions.create_project, desc = "Create Maven Project" },
 }
 
 return commands

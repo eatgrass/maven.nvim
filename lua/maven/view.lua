@@ -88,6 +88,7 @@ function View:setup()
     pattern = "maven",
     callback = function()
       if self.job and self.job.pid then
+        ---@diagnostic disable-next-line: undefined-field
         uv.kill(self.job.pid, 15)
       end
     end,

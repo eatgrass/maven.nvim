@@ -2,14 +2,12 @@ local maven = {}
 local View = require("maven.view")
 local commands = require("maven.commands")
 local config = require("maven.config")
+local validate = require("maven.validate")
+local actions = require("maven.actions")
 local uv = vim.loop
 
 local view
 local job
-
-local function has_build_file(cwd)
-  return vim.fn.findfile("pom.xml", cwd) ~= ""
-end
 
 local function get_cwd()
   local cwd = config.options.cwd or vim.fn.getcwd()
@@ -27,16 +25,56 @@ end
 
 function maven.commands()
   local prompt = "Execute maven goal (" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") .. ")"
+  local cwd = get_cwd()
+
   vim.ui.select(commands, {
     prompt = prompt,
     format_item = function(item)
       return item.desc or item.cmd[1]
     end,
   }, function(cmd)
-    maven.execute_command(cmd)
+    if not cmd then
+      vim.notify("No maven command")
+      return
+    end
+
+    local params
+    if type(cmd.cmd) == "function" then
+      cmd.cmd(function(p)
+        params = p
+        -- Make sure params.cmd is a string table
+        local cmd_copy = params.cmd
+        if type(cmd_copy) == "string" then
+          cmd_copy = vim.split(cmd_copy, " ")
+        end
+        params.cmd = cmd_copy
+
+        -- Validate before executing the generated command
+        local is_valid_params, message_params = validate.validate(params, cwd)
+        if not is_valid_params then
+          vim.notify(message_params, vim.log.levels.ERROR)
+          return
+        end
+
+        local cmd_str = table.concat(params.cmd, " ")
+        vim.notify("Executing command: " .. cmd_str)
+        maven.execute_command(params)
+      end)
+    else
+      -- Validate before executing the generated command
+      local is_valid_cmd, message_cmd = validate.validate(cmd, cwd)
+      if not is_valid_cmd then
+        vim.notify(message_cmd, vim.log.levels.ERROR)
+        return
+      end
+      if cmd.cmd[1] == "add-dependency" then
+        return actions.add_dependency_to_pom()
+      else
+        return maven.execute_command(cmd)
+      end
+    end
   end)
 end
-
 ---@return MavenCommandOption|nil
 function maven.to_command(str)
   if str == nil or str == "" then
@@ -50,17 +88,7 @@ function maven.to_command(str)
 end
 
 function maven.execute_command(command)
-  if command == nil then
-    vim.notify("No maven command")
-    return
-  end
-
   local cwd = get_cwd()
-
-  if not has_build_file(cwd) then
-    vim.notify("no pom.xml file found under " .. cwd, vim.log.levels.ERROR)
-    return
-  end
 
   maven.kill_running_job()
 
@@ -98,6 +126,7 @@ end
 
 function maven.kill_running_job()
   if job and job.pid then
+    ---@diagnostic disable-next-line: undefined-field
     uv.kill(job.pid, 15)
     job = nil
   end
