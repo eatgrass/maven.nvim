@@ -20,7 +20,7 @@ function maven.setup(options)
   config.setup(options)
   if config.options.commands ~= nil then
     for _, command in pairs(config.options.commands) do
-      table.insert(commands, command)
+      table.insert(commands, 1, command)
     end
   end
 end
